@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+source activate py35
+# parse input
+MODE=$1
+if [ "$MODE" == "train" ]; then
+    ISTRAIN=True;
+elif [ "$MODE" == "test" ]; then
+    ISTRAIN=False;
+else
+    echo "Input argument must be train or test";
+    exit 0
+fi
+ENAME=Walker2d-v1
+ROOT_DIR=${PWD}
+EFILE=${ROOT_DIR}/experts/${ENAME}.pkl
+
+# corresponding directories
+CHECKPOINT_DIR=${ROOT_DIR}/checkpoint/${ENAME}
+LOG_DIR=${ROOT_DIR}/log/${ENAME}
+
+python model_dagger.py \
+--num_rollouts=1 \
+--learning_rate=0.001 \
+--epoch=1000 \
+--save_epoch=500 \
+--log_dir=${LOG_DIR} \
+--checkpoint_dir=${CHECKPOINT_DIR} \
+--depth=10 \
+--width=100 \
+--batch_size=100000 \
+--n_demo=100000 \
+--env_name=${ENAME} \
+--expert_policy_file=${EFILE} \
+--is_render \
+--is_train=${ISTRAIN}
+
+source deactivate

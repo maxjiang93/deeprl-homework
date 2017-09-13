@@ -1,0 +1,6 @@
+model_checkpoint_path: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Walker2d-v1/nn.model-16000"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Walker2d-v1/nn.model-3200"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Walker2d-v1/nn.model-3400"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Walker2d-v1/nn.model-3600"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Walker2d-v1/nn.model-3800"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Walker2d-v1/nn.model-16000"

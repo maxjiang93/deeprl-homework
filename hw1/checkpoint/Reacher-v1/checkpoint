@@ -1,0 +1,6 @@
+model_checkpoint_path: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Reacher-v1/nn.model-10000"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Reacher-v1/nn.model-200"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Reacher-v1/nn.model-400"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Reacher-v1/nn.model-600"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Reacher-v1/nn.model-800"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Reacher-v1/nn.model-10000"

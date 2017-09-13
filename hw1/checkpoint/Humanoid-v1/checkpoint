@@ -1,0 +1,4 @@
+model_checkpoint_path: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Humanoid-v1/nn.model-1000"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Humanoid-v1/nn.model-0"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Humanoid-v1/nn.model-500"
+all_model_checkpoint_paths: "/home/maxjiang/Codes/deeprl/deeprl_hw/hw1/checkpoint/Humanoid-v1/nn.model-1000"
