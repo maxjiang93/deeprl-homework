@@ -217,9 +217,9 @@ def train_PG(exp_name='',
         # Define placeholders for targets, a loss function and an update op for fitting a 
         # neural network baseline. These will be used to fit the neural network baseline. 
         # YOUR_CODE_HERE
-        sy_ind_all = tf.range(tf.size(sy_ob_no))
+        sy_ind_all = tf.range(tf.shape(sy_ob_no)[0])
         sy_ind_this = tf.setdiff1d(sy_ind_all, sy_path_end_ind - 1)
-        sy_ind_next = sy_ind_this + 1
+        sy_ind_next = tf.add(sy_ind_this, 1)
         sy_val_this = tf.gather(baseline_prediction, sy_ind_this)  # v_{t}
         sy_val_next = tf.gather(baseline_prediction, sy_ind_next)  # v_{t+1}
         sy_rew_this = tf.gather(sy_rew_n, sy_ind_this) # r_t
@@ -227,7 +227,7 @@ def train_PG(exp_name='',
         baseline_target_mean, baseline_target_std = tf.nn.moments(baseline_target, axes=[0])
         baseline_target = (baseline_target - baseline_target_mean) / baseline_target_std
         baseline_loss = 0.5 * tf.reduce_mean(tf.square(sy_val_this - baseline_target))
-        baseline_update_op = tf.train.AdamOptimizer(learning_rate).minimize(baseline_loss)
+        baseline_update_op = tf.train.AdamOptimizer(0.1*learning_rate).minimize(baseline_loss)
 
 
     #========================================================================================#
@@ -430,8 +430,8 @@ def train_PG(exp_name='',
                                        sy_ac_na: ac_na,
                                        sy_adv_n: adv_n})
         loss_logging, logstd = sess.run([loss, sy_logstd], feed_dict={sy_ob_no: ob_no,
-                                                                    sy_ac_na: ac_na,
-                                                                    sy_adv_n: adv_n})
+                                                                      sy_ac_na: ac_na,
+                                                                      sy_adv_n: adv_n})
         print(logstd)
         # Log diagnostics
         returns = [path["reward"].sum() for path in paths]
