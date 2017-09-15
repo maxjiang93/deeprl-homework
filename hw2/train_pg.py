@@ -9,6 +9,8 @@ import inspect
 from multiprocessing import Process
 from numpy import pi
 
+eps = 1e-9
+
 #============================================================================================#
 # Utilities
 #============================================================================================#
@@ -133,8 +135,6 @@ def train_PG(exp_name='',
     # Define a placeholder for advantages
     #TODO:
     sy_adv_n = tf.placeholder(shape=[None], name="adv", dtype=tf.float32)
-    sy_path_end_ind = tf.placeholder(shape=[None], name="path_ind", dtype=tf.int32)
-    sy_rew_n = tf.placeholder(shape=[None], name="rew", dtype=tf.float32)
 
     #========================================================================================#
     #                           ----------SECTION 4----------
@@ -185,7 +185,7 @@ def train_PG(exp_name='',
     else:
         # YOUR_CODE_HERE
         sy_mean = build_mlp(sy_ob_no, ac_dim, scope="mlp_cont", n_layers=n_layers, size=size)
-        sy_logstd = tf.get_variable("logstd", shape=[ac_dim])  # logstd should just be a trainable variable, not a network output.
+        sy_logstd = tf.get_variable("logstd", shape=[ac_dim],initializer=tf.random_normal_initializer(0, 0.1))  # logstd should just be a trainable variable, not a network output.
         sy_sampled_ac = sy_mean + tf.exp(sy_logstd) * tf.random_normal(tf.shape(sy_mean))
         sy_logprob_n = -0.5 * tf.reduce_sum(tf.multiply(tf.matmul((sy_ac_na - sy_mean),
                                                         tf.diag(tf.exp(sy_logstd))), (sy_ac_na - sy_mean)), axis=-1) \
@@ -217,17 +217,9 @@ def train_PG(exp_name='',
         # Define placeholders for targets, a loss function and an update op for fitting a 
         # neural network baseline. These will be used to fit the neural network baseline. 
         # YOUR_CODE_HERE
-        sy_ind_all = tf.range(tf.shape(sy_ob_no)[0])
-        sy_ind_this = tf.setdiff1d(sy_ind_all, sy_path_end_ind - 1)
-        sy_ind_next = tf.add(sy_ind_this, 1)
-        sy_val_this = tf.gather(baseline_prediction, sy_ind_this)  # v_{t}
-        sy_val_next = tf.gather(baseline_prediction, sy_ind_next)  # v_{t+1}
-        sy_rew_this = tf.gather(sy_rew_n, sy_ind_this) # r_t
-        baseline_target = sy_rew_this + gamma * sy_val_next
-        baseline_target_mean, baseline_target_std = tf.nn.moments(baseline_target, axes=[0])
-        baseline_target = (baseline_target - baseline_target_mean) / baseline_target_std
-        baseline_loss = 0.5 * tf.reduce_mean(tf.square(sy_val_this - baseline_target))
-        baseline_update_op = tf.train.AdamOptimizer(0.1*learning_rate).minimize(baseline_loss)
+        sy_target_n = tf.placeholder(shape=[None], name="target", dtype=tf.float32)
+        baseline_loss = tf.losses.mean_squared_error(labels=sy_target_n, predictions=baseline_prediction)
+        baseline_update_op = tf.train.AdamOptimizer(learning_rate).minimize(baseline_loss)
 
 
     #========================================================================================#
@@ -376,7 +368,7 @@ def train_PG(exp_name='',
             # #bl2 below.)
 
             b_n = sess.run(baseline_prediction, feed_dict={sy_ob_no: ob_no})
-            b_n = (b_n - np.mean(q_n)) / np.std(q_n)
+            b_n = (b_n - np.mean(b_n)) / (np.std(b_n) + eps) * np.std(q_n) + np.mean(q_n)
             adv_n = q_n - b_n
         else:
             adv_n = q_n.copy()
@@ -390,7 +382,7 @@ def train_PG(exp_name='',
             # On the next line, implement a trick which is known empirically to reduce variance
             # in policy gradient methods: normalize adv_n to have mean zero and std=1. 
             # YOUR_CODE_HERE
-            adv_n = (adv_n - np.mean(adv_n)) / (np.std(adv_n)+ 1e-9)
+            adv_n = (adv_n - np.mean(adv_n)) / (np.std(adv_n) + eps)
 
 
         #====================================================================================#
@@ -409,9 +401,9 @@ def train_PG(exp_name='',
             # targets to have mean zero and std=1. (Goes with Hint #bl1 above.)
 
             # YOUR_CODE_HERE
+            norm_q_n = (q_n - np.mean(q_n)) / (np.std(q_n) + eps)
             sess.run(baseline_update_op, feed_dict={sy_ob_no: ob_no,
-                                                    sy_path_end_ind: path_end_ind,
-                                                    sy_rew_n: rew_n})
+                                                    sy_target_n: norm_q_n})
 
 
         #====================================================================================#
