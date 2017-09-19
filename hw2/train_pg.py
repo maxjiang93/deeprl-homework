@@ -185,11 +185,12 @@ def train_PG(exp_name='',
     else:
         # YOUR_CODE_HERE
         sy_mean = build_mlp(sy_ob_no, ac_dim, scope="mlp_cont", n_layers=n_layers, size=size)
-        sy_logstd = tf.get_variable("logstd", shape=[ac_dim],initializer=tf.random_normal_initializer(0, 0.1))  # logstd should just be a trainable variable, not a network output.
+        sy_logstd = tf.get_variable("logstd", shape=[ac_dim])  # logstd should just be a trainable variable, not a network output.
         sy_sampled_ac = sy_mean + tf.exp(sy_logstd) * tf.random_normal(tf.shape(sy_mean))
         sy_logprob_n = -0.5 * tf.reduce_sum(tf.multiply(tf.matmul((sy_ac_na - sy_mean),
-                                                        tf.diag(tf.exp(sy_logstd))), (sy_ac_na - sy_mean)), axis=-1) \
-                       - tf.log(tf.sqrt((2*pi) ** ac_dim * tf.reduce_prod(tf.exp(sy_logstd))))
+                                                        tf.diag(tf.square(tf.exp(sy_logstd))))
+                                                        , (sy_ac_na - sy_mean)), axis=-1) \
+                       - tf.log(tf.sqrt((2*pi) ** ac_dim)) - 2 * tf.reduce_sum(sy_logstd)
         # Hint: Use the log probability under a multivariate gaussian.
 
 
@@ -277,8 +278,6 @@ def train_PG(exp_name='',
         # across paths
         ob_no = np.concatenate([path["observation"] for path in paths])
         ac_na = np.concatenate([path["action"] for path in paths])
-        path_end_ind = np.cumsum(np.array([pathlength(path) for path in paths]))
-        rew_n = np.concatenate([path["reward"] for path in paths])
 
         #====================================================================================#
         #                           ----------SECTION 4----------
