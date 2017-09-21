@@ -185,9 +185,9 @@ def train_PG(exp_name='',
     else:
         # YOUR_CODE_HERE
         sy_mean = build_mlp(sy_ob_no, ac_dim, scope="mlp_cont", n_layers=n_layers, size=size)
-        sy_logstd = tf.get_variable("logstd", shape=[ac_dim], initializer=tf.zeros_initializer())  # logstd should just be a trainable variable, not a network output.
+        sy_logstd = tf.get_variable("logstd", shape=[ac_dim])  # logstd should just be a trainable variable, not a network output.
         sy_sampled_ac = sy_mean + tf.exp(sy_logstd) * tf.random_normal(tf.shape(sy_mean))
-        sy_logprob_n = -0.5 * tf.reduce_sum(tf.square(sy_ac_na - sy_mean) / tf.square(tf.exp(sy_logstd)), axis=-1) \
+        sy_logprob_n = - 0.5 * tf.reduce_sum(tf.square(sy_ac_na - sy_mean) / tf.square(tf.exp(sy_logstd)), axis=1) \
                        - ac_dim / 2 * tf.log(2 * pi) - tf.reduce_sum(sy_logstd)
         # Hint: Use the log probability under a multivariate gaussian.
 
@@ -347,7 +347,7 @@ def train_PG(exp_name='',
                     future_rewards = path["reward"][i_t:]
                     powers = np.arange(len(future_rewards))
                     bases = gamma * np.ones([len(future_rewards)])
-                    this_reward = np.sum(np.multiply(np.power(powers, bases), future_rewards))
+                    this_reward = np.sum(np.multiply(np.power(bases, powers), future_rewards))
                     q_n = np.concatenate([q_n, [this_reward]], axis=0)
 
         #====================================================================================#
