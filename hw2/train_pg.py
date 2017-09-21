@@ -190,7 +190,7 @@ def train_PG(exp_name='',
         sy_logprob_n = -0.5 * tf.reduce_sum(tf.multiply(tf.multiply(sy_ac_na - sy_mean,
                                                         1/tf.square(tf.exp(sy_logstd)))
                                                         , (sy_ac_na - sy_mean)), axis=-1) \
-                       - tf.log(tf.sqrt((2*pi) ** ac_dim)) - 2 * tf.reduce_sum(sy_logstd)
+                       - ac_dim / 2 * tf.log(2 * pi) - tf.reduce_sum(sy_logstd)
         # Hint: Use the log probability under a multivariate gaussian.
 
 
