@@ -7,6 +7,7 @@ import tensorflow                as tf
 import tensorflow.contrib.layers as layers
 from collections import namedtuple
 from dqn_utils import *
+from tqdm import tqdm
 
 epsilon = 0.05
 OptimizerSpec = namedtuple("OptimizerSpec", ["constructor", "kwargs", "lr_schedule"])
@@ -24,7 +25,8 @@ def learn(env,
           learning_freq=4,
           frame_history_len=4,
           target_update_freq=10000,
-          grad_norm_clipping=10):
+          grad_norm_clipping=10,
+          total_steps=1000000):
     """Run Deep Q-learning algorithm.
 
     You can specify your own convnet using q_func.
@@ -167,6 +169,8 @@ def learn(env,
     best_mean_episode_reward = -float('inf')
     last_obs = env.reset()
     LOG_EVERY_N_STEPS = 10000
+
+    pbar = tqdm(total=total_steps)
 
     for t in itertools.count():
         ### 1. Check stopping criterion
@@ -315,3 +319,6 @@ def learn(env,
             print("exploration %f" % exploration.value(t))
             print("learning_rate %f" % optimizer_spec.lr_schedule.value(t))
             sys.stdout.flush()
+
+        pbar.update(1)
+    pbar.close()

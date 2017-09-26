@@ -74,7 +74,8 @@ def atari_learn(env,
         learning_freq=4,
         frame_history_len=4,
         target_update_freq=10000,
-        grad_norm_clipping=10
+        grad_norm_clipping=10,
+        total_steps=num_timesteps
     )
     env.close()
 
