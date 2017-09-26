@@ -8,6 +8,7 @@ import tensorflow.contrib.layers as layers
 from collections import namedtuple
 from dqn_utils import *
 
+epsilon = 0.05
 OptimizerSpec = namedtuple("OptimizerSpec", ["constructor", "kwargs", "lr_schedule"])
 
 def learn(env,
@@ -128,7 +129,17 @@ def learn(env,
     ######
     
     # YOUR CODE HERE
-
+    y_t = rew_t_ph + (1 - done_mask_ph) * gamma * \
+                     tf.reduce_max(q_func(img_in=obs_tp1_float, num_actions=num_actions,
+                                          scope='target_q_func', reuse=False), axis=-1)
+    q_t_all = q_func(img_in=obs_t_float, num_actions=num_actions, scope='q_func', reuse=False)
+    row_ind = tf.expand_dims(tf.range(tf.shape(act_t_ph)[0]), -1)
+    col_ind = tf.expand_dims(act_t_ph, -1)
+    indices = tf.concat([row_ind, col_ind], axis=-1)
+    q_t = tf.gather_nd(params=q_t_all, indices=indices)
+    total_error = 0.5 * tf.reduce_sum(tf.square(q_t - y_t))
+    q_func_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='q_func')
+    target_q_func_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='target_q_func')
     ######
 
     # construct optimization op (with gradient clipping)
@@ -195,6 +206,28 @@ def learn(env,
         #####
         
         # YOUR CODE HERE
+        idx = replay_buffer.store_frame(last_obs)
+        obs = replay_buffer.encode_recent_observation()
+        # take the epsilon-greedy action
+        if model_initialized:
+            best_action = tf.argmax(q_func(img_in=obs, num_actions=num_actions, scope='q_func', reuse=True))
+            roll_a_dice = np.random.uniform(0, 1, [1])[0]
+            if roll_a_dice > epsilon:
+                action = best_action
+            else:
+                actions = np.delete(np.arange(num_actions), [best_action])
+                action = np.random.choice(actions, [1])
+        else:
+            # take a random action
+            action = np.random.choice(num_actions, [1])
+
+        # step with current action
+        obs, reward, done, info = env.step([action])
+        if done:
+            obs = env.reset()
+        replay_buffer.store_effect(idx=idx, action=action, reward=reward, done=done)
+        # point last_obs to latest observation
+        last_obs = obs
 
         #####
 
@@ -245,6 +278,26 @@ def learn(env,
             #####
             
             # YOUR CODE HERE
+            # 3.a:
+            obs_t_batch, act_t_batch, rew_t_batch, obs_tp1_batch, done_mask_batch \
+                = replay_buffer.sample(batch_size=batch_size)
+            # 3.b:
+            if not model_initialized:
+                initialize_interdependent_variables(session, tf.global_variables(), {
+                                                    obs_t_ph: obs_t_batch,
+                                                    obs_tp1_ph: obs_tp1_batch,
+                                                    })
+            # 3.c:
+            session.run([train_fn], feed_dict={obs_t_ph: obs_t_batch,
+                                               act_t_ph: act_t_batch,
+                                               rew_t_ph: rew_t_batch,
+                                               obs_tp1_ph: obs_tp1_batch,
+                                               done_mask_ph: done_mask_batch,
+                                               learning_rate: optimizer_spec.lr_schedule.value(t)})
+            # 3.d:
+            if t % target_update_freq == 0:
+                session.run(update_target_fn)
+                num_param_updates += 1
 
             #####
 
