@@ -215,7 +215,7 @@ def learn(env,
         # take the epsilon-greedy action
         if model_initialized:
             q_eval = session.run(q_t_all, feed_dict={obs_t_ph: np.expand_dims(obs, axis=0)})
-            best_action = np.argmax(np.squeeze(q_eval))[0]
+            best_action = np.argmax(np.squeeze(q_eval))
             roll_a_dice = np.random.uniform(0, 1, [1])[0]
             if roll_a_dice > epsilon:
                 action = best_action
