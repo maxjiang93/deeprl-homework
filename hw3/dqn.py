@@ -214,8 +214,8 @@ def learn(env,
         obs = replay_buffer.encode_recent_observation()
         # take the epsilon-greedy action
         if model_initialized:
-            q_eval = session.run(q_t_all, feed_dict={obs_t_ph: obs})
-            best_action = np.argmax(q_eval)[0]
+            q_eval = session.run(q_t_all, feed_dict={obs_t_ph: np.expand_dims(obs, axis=0)})
+            best_action = np.argmax(np.squeeze(q_eval))[0]
             roll_a_dice = np.random.uniform(0, 1, [1])[0]
             if roll_a_dice > epsilon:
                 action = best_action
