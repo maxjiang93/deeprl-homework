@@ -94,13 +94,13 @@ def learn(env,
 
     # set up placeholders
     # placeholder for current observation (or state)
-    obs_t_ph              = tf.placeholder(tf.uint8, [None] + list(input_shape))
+    obs_t_ph              = tf.placeholder(tf.uint8,   [None] + list(input_shape))
     # placeholder for current action
     act_t_ph              = tf.placeholder(tf.int32,   [None])
     # placeholder for current reward
     rew_t_ph              = tf.placeholder(tf.float32, [None])
     # placeholder for next observation (or state)
-    obs_tp1_ph            = tf.placeholder(tf.uint8, [None] + list(input_shape))
+    obs_tp1_ph            = tf.placeholder(tf.uint8,   [None] + list(input_shape))
     # placeholder for end of episode mask
     # this value is 1 if the next state corresponds to the end of an episode,
     # in which case there is no Q-value at the next state; at the end of an
@@ -208,13 +208,14 @@ def learn(env,
         # might as well be random, since you haven't trained your net...)
 
         #####
-        
+
         # YOUR CODE HERE
         idx = replay_buffer.store_frame(last_obs)
         obs = replay_buffer.encode_recent_observation()
         # take the epsilon-greedy action
         if model_initialized:
-            best_action = tf.argmax(q_func(img_in=obs, num_actions=num_actions, scope='q_func', reuse=True))
+            q_eval = session.run(q_t_all, feed_dict={obs_t_ph: obs})
+            best_action = np.argmax(q_eval)[0]
             roll_a_dice = np.random.uniform(0, 1, [1])[0]
             if roll_a_dice > epsilon:
                 action = best_action
@@ -244,8 +245,8 @@ def learn(env,
         # for us to learn something useful -- until then, the model will not be
         # initialized and random actions should be taken
         if (t > learning_starts and
-                t % learning_freq == 0 and
-                replay_buffer.can_sample(batch_size)):
+            t % learning_freq == 0 and
+            replay_buffer.can_sample(batch_size)):
             # Here, you should perform training. Training consists of four steps:
             # 3.a: use the replay buffer to sample a batch of transitions (see the
             # replay buffer code for function definition, each batch that you sample
@@ -319,6 +320,6 @@ def learn(env,
             tqdm.write("exploration %f" % exploration.value(t))
             tqdm.write("learning_rate %f" % optimizer_spec.lr_schedule.value(t))
             sys.stdout.flush()
-
-        pbar.update()
+        if t % 500 == 0 and t != 0:
+            pbar.update(500)
     pbar.close()
