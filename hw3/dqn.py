@@ -292,6 +292,7 @@ def learn(env,
                                                     obs_t_ph: obs_t_batch,
                                                     obs_tp1_ph: obs_tp1_batch,
                                                     })
+                model_initialized = True
             # 3.c:
             session.run([train_fn], feed_dict={obs_t_ph: obs_t_batch,
                                                act_t_ph: act_t_batch,
