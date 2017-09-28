@@ -9,7 +9,6 @@ from collections import namedtuple
 from dqn_utils import *
 from tqdm import tqdm
 
-epsilon = 0.05
 OptimizerSpec = namedtuple("OptimizerSpec", ["constructor", "kwargs", "lr_schedule"])
 
 def learn(env,
@@ -217,7 +216,7 @@ def learn(env,
             q_eval = session.run(q_t_all, feed_dict={obs_t_ph: np.expand_dims(obs, axis=0)})
             best_action = np.argmax(np.squeeze(q_eval))
             roll_a_dice = np.random.uniform(0, 1, [1])[0]
-            if roll_a_dice > epsilon:
+            if roll_a_dice > exploration.value(t):
                 action = best_action
             else:
                 actions = np.delete(np.arange(num_actions), [best_action])
