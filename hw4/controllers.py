@@ -66,8 +66,8 @@ class MPCcontroller(Controller):
         for i in range(self.num_simulated_paths):
             traj_costs.append(trajectory_cost_fn(self.cost_fn, obs[:, i, :], acs[:, i, :], next_obs[:, i, :]))
 
-        j_best = np.argmax(np.array(traj_costs))
-        self.traj_costs = traj_costs
+        self.traj_costs = np.array(traj_costs)
+        j_best = np.argmax(self.traj_costs)
 
         return acs[0, j_best, :]
 
