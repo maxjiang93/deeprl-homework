@@ -98,13 +98,13 @@ class NNDynamicsModel():
         for i in range(len(data)):
             delta_i = [data[i]['next_observations'][j] - data[i]['observations'][j]
                        for j in range(len(data[i]['next_observations']))]
-            obs.append(data[i]['observations'])
-            action.append(data[i]['actions'])
-            deltas.append(delta_i)
+            obs += data[i]['observations']
+            action += data[i]['actions']
+            deltas += delta_i
 
-        obs, deltas, action = np.array(obs).reshape([-1, self.ob_dim]), \
-                              np.array(deltas).reshape([-1, self.ob_dim]), \
-                              np.array(action).reshape([-1, self.ac_dim])
+        obs, deltas, action = np.array(obs), \
+                              np.array(deltas), \
+                              np.array(action)
 
         n_sample = obs.shape[0]
 
