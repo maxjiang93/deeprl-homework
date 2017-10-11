@@ -4,7 +4,7 @@ import numpy as np
 eps = 1e-9
 
 
-# Predefined function to build a feedforwarfd neural network
+# Predefined function to build a feedforward neural network
 def build_mlp(input_placeholder, 
               output_size,
               scope, 
@@ -63,7 +63,7 @@ class NNDynamicsModel():
         # normalize observations and actions
         self.ob_norm_ph = (self.ob_raw_ph - mean_obs) / (std_obs + eps)
         self.ac_norm_ph = (self.ac_raw_ph - mean_action) / (std_action + eps)
-        self.dl_norm_ph = (self.dl_raw_ph - mean_deltas) / std_deltas
+        self.dl_norm_ph = (self.dl_raw_ph - mean_deltas) / (std_deltas + eps)
 
         # feed inputs to neural network
         self.input_ph = tf.concat((self.ob_norm_ph, self.ac_norm_ph), axis=-1)
@@ -112,7 +112,7 @@ class NNDynamicsModel():
         print("Fitting Dynamics Model...")
         from tqdm import tqdm
 
-        for epoch in tqdm(range(self.iterations)):
+        for _ in tqdm(range(self.iterations)):
             # shuffle
             perm = np.random.permutation(n_sample)
             obs, deltas, action = obs[perm], deltas[perm], action[perm]
@@ -124,8 +124,8 @@ class NNDynamicsModel():
                 ac_batch = action[idx * self.batch_size:(idx + 1) * self.batch_size, :]
                 dl_batch = deltas[idx * self.batch_size:(idx + 1) * self.batch_size, :]
                 self.sess.run(self.training_op, feed_dict={self.ob_raw_ph: ob_batch,
-                                                      self.ac_raw_ph: ac_batch,
-                                                      self.dl_raw_ph: dl_batch})
+                                                           self.ac_raw_ph: ac_batch,
+                                                           self.dl_raw_ph: dl_batch})
 
     def predict(self, states, actions):
         """ Write a function to take in a batch of (unnormalized) states and (unnormalized) actions and return the (unnormalized) next states as predicted by using the model """
