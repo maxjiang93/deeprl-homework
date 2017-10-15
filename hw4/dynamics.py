@@ -141,7 +141,8 @@ class NNDynamicsModel():
             actions_batch = actions[b * self.batch_size: (b+1) * self.batch_size]
             pred_batch = self.sess.run(self.pred_raw, feed_dict={self.ob_raw_ph: states_batch,
                                                                  self.ac_raw_ph: actions_batch})
-            preds.append(pred_batch)
+            next_states_batch = states_batch + pred_batch
+            preds.append(next_states_batch)
 
         # pad array if needed
         if pad_size:
@@ -154,7 +155,9 @@ class NNDynamicsModel():
             actions_batch[:a0, :a1] = actions[b * self.batch_size:]
             pred_batch = self.sess.run(self.pred_raw, feed_dict={self.ob_raw_ph: states_batch,
                                                                  self.ac_raw_ph: actions_batch})
-            preds.append(pred_batch[:s0])
+            pred_batch, states_batch = pred_batch[:s0], states_batch[:s0]
+            next_states_batch = states_batch + pred_batch
+            preds.append(next_states_batch)
 
         predictions = np.concatenate(preds, axis=0)
 
