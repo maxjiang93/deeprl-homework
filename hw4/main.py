@@ -38,7 +38,7 @@ def sample(env,
         totalr = 0.
         steps = 0
         while not done:
-            action = controller.get_action(obs[None, :])
+            action = controller.get_action(obs)
             path['observations'].append(obs)
             path['actions'].append(action)
             obs, r, done, _ = env.step(action)
@@ -312,7 +312,7 @@ def main():
           num_simulated_paths=args.simulated_paths,
           env_horizon=args.ep_len,
           mpc_horizon=args.mpc_horizon,
-          n_layers = args.n_layers,
+          n_layers=args.n_layers,
           size=args.size,
           activation=tf.nn.relu,
           output_activation=None,
