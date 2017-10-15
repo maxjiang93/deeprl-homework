@@ -228,7 +228,7 @@ def train(env,
         new_data = sample(env=env,
                           controller=mpc_controller,
                           num_paths=num_paths_onpol,
-                          horizon=mpc_horizon,
+                          horizon=env_horizon,
                           render=render,
                           verbose=True)
 
