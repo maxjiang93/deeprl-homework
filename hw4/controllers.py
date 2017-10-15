@@ -67,7 +67,7 @@ class MPCcontroller(Controller):
             traj_costs.append(trajectory_cost_fn(self.cost_fn, obs[:, i, :], acs[:, i, :], next_obs[:, i, :]))
 
         self.traj_costs = np.array(traj_costs)
-        j_best = np.argmax(self.traj_costs)
+        j_best = np.argmin(self.traj_costs)
 
         return acs[0, j_best, :]
 
