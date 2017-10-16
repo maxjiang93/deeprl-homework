@@ -255,6 +255,7 @@ def train(env,
         logz.log_tabular('MaximumReturn', np.max(returns))
 
         logz.dump_tabular()
+        logz.pickle_tf_vars()
 
 
 def main():
